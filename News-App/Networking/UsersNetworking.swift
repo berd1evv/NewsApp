@@ -24,13 +24,11 @@ struct UsersNetworking {
             let num = i
             startURLSession(url: url!, num: num)
         }
-        
     }
     
     func startURLSession(url: URL, num: Int) {
         let session = URLSession(configuration: .default)
         let task = session.dataTask(with: url) { (data, response, error) in
-
             if error != nil { return }
             
             if let data = data {

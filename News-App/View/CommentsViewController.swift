@@ -16,20 +16,12 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     
     var list: [Int] = []
     
-    let commentsNotification = Notification.Name("commentsNotification")
-    
-    deinit {
-        NotificationCenter.default.removeObserver(self)
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
         
         title = "Comments of the post"
-        
-        NotificationCenter.default.addObserver(self, selector: #selector(getData(_:)), name: commentsNotification, object: nil)
-        
+                
         tableView.register(CommentsProductCell.self, forCellReuseIdentifier: "cell")
         tableView.delegate = self
         tableView.dataSource = self
@@ -46,10 +38,6 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-    }
- 
-    @objc func getData(_ notification: NSNotification) {
-        print(notification.object.unsafelyUnwrapped)
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

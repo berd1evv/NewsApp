@@ -25,7 +25,6 @@ struct UsersDetailsNetworking {
     func startURLSession(url: URL) {
         let session = URLSession(configuration: .default)
         let task = session.dataTask(with: url) { (data, response, error) in
-
             if error != nil { return }
 
             if let data = data {

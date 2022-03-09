@@ -27,7 +27,6 @@ struct CommentsNetworking {
     func startURLSession(url: URL, number: Int) {
         let session = URLSession(configuration: .default)
         let task = session.dataTask(with: url) { (data, response, error) in
-
             if error != nil { return }
 
             if let data = data {

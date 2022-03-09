@@ -10,9 +10,7 @@ import UIKit
 class UsersDetailsViewController: UIViewController, UsersDetailsNetworkingDelegate {
     
     var network = UsersDetailsNetworking()
-    let users = UsersViewController()
     private let viewModel: UserDetailsViewModelProtocol
-    
     var id = 1
     
     init(vm: UserDetailsViewModelProtocol = UserDetailsViewModel()){
@@ -28,7 +26,7 @@ class UsersDetailsViewController: UIViewController, UsersDetailsNetworkingDelega
     override func viewDidLoad() {
         view.backgroundColor = .white
         title = "User details"
-                
+        
         network.delegate = self
         network.fetchUsers(userId: id)
         
@@ -40,10 +38,6 @@ class UsersDetailsViewController: UIViewController, UsersDetailsNetworkingDelega
         view.addSubview(viewModel.company)
         
         setUpConstraints()
-    }
-    
-    @objc func getData(_ notification: NSNotification) {
-        print(notification.object.unsafelyUnwrapped)
     }
     
     func didAddCell(manager: UsersDetailsNetworking, model: UsersDetailsModel) {

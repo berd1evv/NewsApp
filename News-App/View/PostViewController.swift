@@ -27,13 +27,11 @@ class PostViewController: UIViewController, UITableViewDelegate, UITableViewData
         network.fetchPost()
         
         view.addSubview(tableView)
-
     }
     
     override func viewDidLayoutSubviews() {
         tableView.frame = view.frame
     }
-    
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return products.count
