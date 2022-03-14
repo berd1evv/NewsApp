@@ -4,4 +4,5 @@ use_frameworks!
 
 target 'News-App' do
     pod 'SnapKit', '~> 5.0.1'
+    pod 'RealmSwift', '~>10'
 end

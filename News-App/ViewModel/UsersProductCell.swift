@@ -8,12 +8,6 @@
 import UIKit
 
 class UsersProductCell: UITableViewCell {
-    var product : UsersModel? {
-        didSet {
-            productName.text = product?.name
-            productUserName.text = product?.userName
-        }
-    }
     
     private let productName : UILabel = {
         let lbl = UILabel()
@@ -43,6 +37,11 @@ class UsersProductCell: UITableViewCell {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    func setUp(name: String, username: String) {
+        productName.text = name
+        productUserName.text = username
     }
     
     func setUpConstraints() {

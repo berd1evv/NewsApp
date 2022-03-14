@@ -6,30 +6,64 @@
 //
 
 import UIKit
+import RealmSwift
 
-class CommentsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, CommentsNetworkingDelegate{
+class CommentsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource{
     
+    let realm = try! Realm()
+    var comment: Results<CommentsModel>?
+        
     var tableView = UITableView()
-    var products : [CommentsModel] = [CommentsModel]()
-    var network = CommentsNetworking()
+    var network = Networking()
+    
     var id = 1
-    
-    var list: [Int] = []
-    
+        
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-        
         title = "Comments of the post"
-                
+        
         tableView.register(CommentsProductCell.self, forCellReuseIdentifier: "cell")
+        
         tableView.delegate = self
         tableView.dataSource = self
         view.addSubview(tableView)
         
-        network.delegate = self
-        network.fetchComments(commentId: id)
+        parse()
 
+        render()
+    }
+    
+    func getData(_ data: [CommentsModel]? = nil) {
+        guard let data = data else {
+            return
+        }
+        
+        if comment != nil {
+            try! realm.write {
+                realm.delete(comment!)
+            }
+        }
+        
+        realm.beginWrite()
+        realm.add(data)
+        
+        try! realm.commitWrite()
+        
+        tableView.reloadData()
+    }
+    
+    func parse() {
+        network.commentsNetworking(id: id) { [weak self] data in
+            DispatchQueue.main.async {
+                self?.getData(data)
+                self?.tableView.reloadData()
+            }
+        }
+    }
+    
+    func render() {
+        comment = realm.objects(CommentsModel.self)
     }
     
     override func viewDidLayoutSubviews() {
@@ -41,13 +75,13 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return products.count
+        return comment?.count ?? 1
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! CommentsProductCell
-        let currentLastItem = products[indexPath.row]
-        cell.product = currentLastItem
+        let item = self.comment?[indexPath.row].body
+        cell.setUp(comment: item!)
         return cell
     }
     
@@ -59,10 +93,4 @@ class CommentsViewController: UIViewController, UITableViewDelegate, UITableView
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
-    func didAddCell(manager: CommentsNetworking, model: CommentsModel) {
-        DispatchQueue.main.async {
-            self.products.append(CommentsModel(comments: model.comments, icon: UIImage(systemName: "person.crop.circle")!))
-            self.tableView.reloadData()
-        }
-    }
 }

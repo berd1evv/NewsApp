@@ -6,9 +6,11 @@
 //
 
 import UIKit
+import RealmSwift
 
-struct PostsModel {
-    var title: String
-    var description: String
-    var image: UIImage
+class PostsModel: Object, Codable {
+    @objc dynamic var userId: Int = 0
+    @objc dynamic var id: Int = 0
+    @objc dynamic var title: String = ""
+    @objc dynamic var body: String = ""
 }

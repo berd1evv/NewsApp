@@ -9,19 +9,12 @@ import UIKit
 import SnapKit
 
 class PostsProductCell: UITableViewCell {
-    var product : PostsModel? {
-        didSet {
-            productImage.image = product?.image
-            productTitle.text = product?.title
-            productDescription.text = product?.description
-        }
-    }
     
     private let productTitle : UILabel = {
         let lbl = UILabel()
         lbl.textColor = .black
         lbl.font = .boldSystemFont(ofSize: 12)
-        lbl.textAlignment = .left
+        lbl.textAlignment = .center
         lbl.translatesAutoresizingMaskIntoConstraints = false
         return lbl
     }()
@@ -30,7 +23,7 @@ class PostsProductCell: UITableViewCell {
         let lbl = UILabel()
         lbl.textColor = .black
         lbl.font = .boldSystemFont(ofSize: 20)
-        lbl.textAlignment = .left
+        lbl.textAlignment = .center
         lbl.translatesAutoresizingMaskIntoConstraints = false
         return lbl
     }()
@@ -56,6 +49,12 @@ class PostsProductCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    func setUp(title: String, description: String) {
+        productTitle.text = title
+        productDescription.text = description
+        productImage.image = UIImage(systemName: "rectangle.fill")
+    }
+    
     func setUpConstraints() {
         productImage.snp.makeConstraints { make in
             make.centerX.equalToSuperview()
@@ -67,11 +66,13 @@ class PostsProductCell: UITableViewCell {
         productTitle.snp.makeConstraints { make in
             make.top.equalTo(productImage.snp.bottom).offset(5)
             make.centerX.equalToSuperview()
+            make.width.equalToSuperview()
         }
         
         productDescription.snp.makeConstraints { make in
             make.top.equalTo(productTitle.snp.bottom).offset(10)
             make.centerX.equalToSuperview()
+            make.width.equalToSuperview()
         }
     }
 }

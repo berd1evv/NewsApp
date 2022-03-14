@@ -6,41 +6,75 @@
 //
 
 import UIKit
+import RealmSwift
 
-
-class PostViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, NetworkingDelegate {
+class PostViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+    
+    let realm = try! Realm()
+    var posts: Results<PostsModel>?
     
     var tableView = UITableView()
-    var products : [PostsModel] = [PostsModel]()
-    var network = PostsNetworking()
+    var network = Networking()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-        
         title = "Posts"
         
         tableView.register(PostsProductCell.self, forCellReuseIdentifier: "cell")
         tableView.delegate = self
         tableView.dataSource = self
-        network.delegate = self
-        network.fetchPost()
-        
+      
         view.addSubview(tableView)
+        
+        parse()
+        render()
     }
     
     override func viewDidLayoutSubviews() {
         tableView.frame = view.frame
     }
     
+    func getData(_ data: [PostsModel]? = nil) {
+        guard let data = data else {
+            return
+        }
+        
+        if posts != nil {
+            try! realm.write {
+                realm.delete(posts!)
+            }
+        }
+        
+        realm.beginWrite()
+        realm.add(data)
+        
+        try! realm.commitWrite()
+        
+        tableView.reloadData()
+    }
+    
+    func parse() {
+        network.postsNetworking() { [weak self] data in
+            DispatchQueue.main.async {
+                self?.getData(data)
+                self?.tableView.reloadData()
+            }
+        }
+    }
+    
+    func render() {
+        posts = realm.objects(PostsModel.self)
+    }
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return products.count
+        return posts?.count ?? 1
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! PostsProductCell
-        let currentLastItem = products[indexPath.row]
-        cell.product = currentLastItem
+        let item = posts?[indexPath.row]
+        cell.setUp(title: item!.title, description: item!.title)
         return cell
     }
     
@@ -55,10 +89,4 @@ class PostViewController: UIViewController, UITableViewDelegate, UITableViewData
         navigationController?.pushViewController(destination, animated: true)
     }
     
-    func didAddCell(manager: PostsNetworking, model: PostsModel) {
-        DispatchQueue.main.async {
-            self.products.append(PostsModel(title: model.title, description: model.description, image: UIImage(systemName: "rectangle.fill")!))
-            self.tableView.reloadData()
-        }
-    }
 }

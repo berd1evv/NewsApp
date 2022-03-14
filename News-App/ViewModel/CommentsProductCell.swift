@@ -8,12 +8,7 @@
 import UIKit
 
 class CommentsProductCell: UITableViewCell {
-    var product : CommentsModel? {
-        didSet {
-            productComment.text = product?.comments
-            productImage.image = product?.icon
-        }
-    }
+        
     private let productImage : UIImageView = {
         let imgView = UIImageView(image: UIImage(named: "person.fill"))
         imgView.contentMode = .scaleAspectFit
@@ -43,6 +38,11 @@ class CommentsProductCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    func setUp(comment: String) {
+        productComment.text = comment
+        productImage.image = UIImage(systemName: "person.fill")
+    }
+    
     func setUpConstraints() {
         productImage.snp.makeConstraints { make in
             make.top.equalToSuperview().offset(15)
@@ -54,6 +54,7 @@ class CommentsProductCell: UITableViewCell {
         productComment.snp.makeConstraints { make in
             make.left.equalTo(productImage.snp.right).offset(10)
             make.top.equalToSuperview().offset(30)
+            make.width.equalToSuperview().offset(-70)
         }
     }
     

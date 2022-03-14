@@ -6,8 +6,8 @@
 //
 
 import UIKit
+import RealmSwift
 
-struct CommentsModel {
-    var comments: String
-    var icon: UIImage
+class CommentsModel: Object, Codable {
+    @objc dynamic var body: String = ""
 }

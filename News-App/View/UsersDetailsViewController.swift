@@ -6,78 +6,142 @@
 //
 
 import UIKit
+import RealmSwift
 
-class UsersDetailsViewController: UIViewController, UsersDetailsNetworkingDelegate {
+class UsersDetailsViewController: UIViewController {
+    let realm = try! Realm()
+    var details: Results<UsersModel>?
     
-    var network = UsersDetailsNetworking()
-    private let viewModel: UserDetailsViewModelProtocol
+    var network = Networking()
     var id = 1
     
-    init(vm: UserDetailsViewModelProtocol = UserDetailsViewModel()){
-        viewModel = vm
-        super.init(nibName: nil, bundle: nil)
-    }
+    var userName : UILabel = {
+        let lbl = UILabel()
+        lbl.textColor = .black
+        lbl.translatesAutoresizingMaskIntoConstraints = false
+        return lbl
+    }()
     
-    required init?(coder: NSCoder) {
-            fatalError("init(coder:) has not been implemented")
-    }
+    var name : UILabel = {
+        let lbl = UILabel()
+        lbl.textColor = .black
+        lbl.textAlignment = .left
+        lbl.translatesAutoresizingMaskIntoConstraints = false
+        return lbl
+    }()
     
+    var email : UILabel = {
+        let lbl = UILabel()
+        lbl.textColor = .black
+        lbl.textAlignment = .left
+        lbl.translatesAutoresizingMaskIntoConstraints = false
+        return lbl
+    }()
+    
+    var phone : UILabel = {
+        let lbl = UILabel()
+        lbl.textColor = .black
+        lbl.textAlignment = .left
+        lbl.translatesAutoresizingMaskIntoConstraints = false
+        return lbl
+    }()
+
+    var website : UILabel = {
+        let lbl = UILabel()
+        lbl.textColor = .black
+        lbl.textAlignment = .left
+        lbl.translatesAutoresizingMaskIntoConstraints = false
+        return lbl
+    }()
+
+    var company : UILabel = {
+        let lbl = UILabel()
+        lbl.textColor = .black
+        lbl.textAlignment = .left
+        lbl.translatesAutoresizingMaskIntoConstraints = false
+        return lbl
+    }()
     
     override func viewDidLoad() {
         view.backgroundColor = .white
         title = "User details"
         
-        network.delegate = self
-        network.fetchUsers(userId: id)
+        view.addSubview(userName)
+        view.addSubview(name)
+        view.addSubview(email)
+        view.addSubview(phone)
+        view.addSubview(website)
+        view.addSubview(company)
         
-        view.addSubview(viewModel.userName)
-        view.addSubview(viewModel.name)
-        view.addSubview(viewModel.email)
-        view.addSubview(viewModel.phone)
-        view.addSubview(viewModel.website)
-        view.addSubview(viewModel.company)
-        
+        render()
         setUpConstraints()
+        
+        didSetTitle()
     }
     
-    func didAddCell(manager: UsersDetailsNetworking, model: UsersDetailsModel) {
-        DispatchQueue.main.async {
-            self.viewModel.userName.text = model.userName
-            self.viewModel.name.text = model.name
-            self.viewModel.email.text = model.email
-            self.viewModel.phone.text = model.phone
-            self.viewModel.website.text = model.website
-            self.viewModel.company.text = model.company
-
+    func getData(_ data: [UsersModel]? = nil) {
+        guard let data = data else {
+            return
+        }
+        
+        if details != nil {
+            try! realm.write {
+                realm.delete(details!)
+            }
+        }
+        
+        try! realm.write({
+            realm.add(data)
+        })
+    }
+    
+    func parse() {
+        network.usersNetworking() { [weak self] data in
+            DispatchQueue.main.async {
+                self?.getData(data)
+            }
         }
     }
     
+    func render() {
+        details = realm.objects(UsersModel.self)
+    }
+
+    func didSetTitle() {
+        userName.text = details?[id].username
+        name.text = details?[id].name
+        email.text = details?[id].email
+        phone.text = details?[id].phone
+        website.text = details?[id].website
+        company.text = details?[id].company?.name
+    }
+    
     func setUpConstraints() {
-        viewModel.userName.snp.makeConstraints { make in
+        userName.snp.makeConstraints { make in
             make.top.equalToSuperview().offset(120)
             make.centerX.equalToSuperview()
         }
         
-        viewModel.name.snp.makeConstraints { make in
-            make.top.equalTo(viewModel.userName.snp.bottom).offset(20)
+        name.snp.makeConstraints { make in
+            make.top.equalTo(userName.snp.bottom).offset(20)
             make.centerX.equalToSuperview()
         }
         
-        viewModel.email.snp.makeConstraints { make in
-            make.top.equalTo(viewModel.name.snp.bottom).offset(20)
+        email.snp.makeConstraints { make in
+            make.top.equalTo(name.snp.bottom).offset(20)
             make.centerX.equalToSuperview()
         }
         
-        viewModel.phone.snp.makeConstraints { make in
-            make.top.equalTo(viewModel.email.snp.bottom).offset(20)
+        phone.snp.makeConstraints { make in
+            make.top.equalTo(email.snp.bottom).offset(20)
             make.centerX.equalToSuperview()
         }
-        viewModel.website.snp.makeConstraints { make in
-            make.top.equalTo(viewModel.phone.snp.bottom).offset(20)
+        website.snp.makeConstraints { make in
+            make.top.equalTo(phone.snp.bottom).offset(20)
             make.centerX.equalToSuperview()
         }
-        viewModel.company.snp.makeConstraints { make in
-            make.top.equalTo(viewModel.website.snp.bottom).offset(20)
+        company.snp.makeConstraints { make in
+            make.top.equalTo(website.snp.bottom).offset(20)
             make.centerX.equalToSuperview()
         }
     }

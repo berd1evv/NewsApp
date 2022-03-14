@@ -6,18 +6,20 @@
 //
 
 import UIKit
+import RealmSwift
 
-class UsersViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UsersNetworkDelegate {
+class UsersViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+    
+    let realm = try! Realm()
+    var users: Results<UsersModel>?
     
     var tableView = UITableView()
-    var products : [UsersModel] = [UsersModel]()
-    var network = UsersNetworking()
+    var network = Networking()
 
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-        
         title = "Users"
         
         tableView.register(UsersProductCell.self, forCellReuseIdentifier: "cell")
@@ -26,40 +28,65 @@ class UsersViewController: UIViewController, UITableViewDelegate, UITableViewDat
         
         view.addSubview(tableView)
         
-        network.delegate = self
-        network.fetchUsers()
+        parse()
+        render()
+    }
+    
+    func render() {
+        users = realm.objects(UsersModel.self)
     }
     
     override func viewDidLayoutSubviews() {
         tableView.frame = view.frame
     }
     
+    func getData(_ data: [UsersModel]? = nil) {
+        guard let data = data else {
+            return
+        }
+        
+        if users != nil {
+            try! realm.write {
+                realm.delete(users!)
+            }
+        }
+        
+        try! realm.write({
+            realm.add(data)
+        })
+        
+        tableView.reloadData()
+    }
+    
+    func parse() {
+        network.usersNetworking() { [weak self] data in
+            DispatchQueue.main.async {
+                self?.getData(data)
+                self?.tableView.reloadData()
+            }
+        }
+    }
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return products.count
+        return users?.count ?? 1
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! UsersProductCell
-        let currentLastItem = products[indexPath.row]
-        cell.product = currentLastItem
+        let item = users?[indexPath.row]
+        cell.setUp(name: item!.name, username: item!.username)
         return cell
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 80
+        return 70
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let destination = UsersDetailsViewController()
-        destination.id = indexPath[1] + 1
+        destination.id = indexPath[1]
+        
         navigationController?.pushViewController(destination, animated: true)
-    }
-    
-    func didAddCell(manager: UsersNetworking, model: UsersModel) {
-        DispatchQueue.main.async {
-            self.products.append(UsersModel(name: model.name, userName: model.userName))
-            self.tableView.reloadData()
-        }
     }
 }
